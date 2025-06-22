@@ -18,7 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiFetch = async (endpoint) => {
         try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`);
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
