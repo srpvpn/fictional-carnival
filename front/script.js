@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 headers: {
-                    'Accept': 'application/json'
+                    'ngrok-skip-browser-warning': 'True'
                 }
             });
             if (!response.ok) {
