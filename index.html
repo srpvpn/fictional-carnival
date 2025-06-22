@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gifts Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1>
+            <img src="img/download.svg" alt="GiftHub Logo" class="header-logo">
+            GiftHub
+        </h1>
+        <div class="form-container">
+            <div class="select-group">
+                <label for="gift-select">Выберите коллекцию:</label>
+                <select id="gift-select" class="custom-select">
+                    <option value="">Загрузка коллекций...</option>
+                </select>
+            </div>
+
+            <div class="select-group">
+                <label for="model-select">Модель:</label>
+                <select id="model-select" class="custom-select" disabled>
+                    <option value="">Сначала выберите коллекцию</option>
+                </select>
+            </div>
+
+            <div class="select-group">
+                <label for="backdrop-select">Фон:</label>
+                <select id="backdrop-select" class="custom-select" disabled>
+                    <option value="">Любой фон</option>
+                </select>
+            </div>
+
+            <div class="select-group">
+                <label for="symbol-select">Символ:</label>
+                <select id="symbol-select" class="custom-select" disabled>
+                    <option value="">Любой символ</option>
+                </select>
+            </div>
+
+            <button id="search-btn" class="button">Найти Floor</button>
+        </div>
+
+        <div id="results-container">
+            <!-- Результаты будут здесь -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
