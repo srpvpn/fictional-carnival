@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsContainer = document.getElementById('results-container');
     const giftPreviewImg = document.getElementById('gift-preview-img');
 
-    const API_BASE_URL = 'http://109.206.236.151:8000';
+    const API_BASE_URL = 'https://glad-social-tapir.ngrok-free.app/';
 
     // --- Helper Functions ---
 
