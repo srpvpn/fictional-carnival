@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsContainer = document.getElementById('results-container');
     const giftPreviewImg = document.getElementById('gift-preview-img');
 
-    const API_BASE_URL = 'https://glad-social-tapir.ngrok-free.app';
+    const API_BASE_URL = 'https://api.lunarsnake.space';
 
     // --- Helper Functions ---
 
