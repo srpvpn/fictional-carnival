@@ -57,40 +57,87 @@ label {
     color: #c0c0c0;
 }
 
-.custom-select {
-    width: 100%;
-    padding: 10px 12px;
-    background-color: #333333;
-    color: #f0f0f0;
+/* --- Tom Select Custom Styles --- */
+
+.ts-wrapper .ts-control {
+    background: #333333;
     border: 1px solid #484848;
     border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5%22%20stroke%3D%22%23cccccc%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
+    padding: 10px 12px;
+    box-shadow: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.custom-select:hover {
-    background-color: #3a3a3a;
-    border-color: #606060;
-}
-
-.custom-select:focus {
-    outline: none;
+.ts-wrapper.focus .ts-control {
     border-color: #7b68ee;
     box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.3);
 }
 
-.custom-select:disabled {
-    cursor: not-allowed;
-    background-color: #2a2a2a;
-    color: #666666;
-    opacity: 0.6;
+.ts-wrapper .ts-control>input::placeholder {
+    color: #f0f0f0;
 }
 
+.ts-wrapper .ts-control,
+.ts-wrapper .ts-control * {
+    color: #f0f0f0;
+    font-family: 'Inter', sans-serif;
+}
+
+.ts-dropdown {
+    background: #2d2d2d;
+    border: 1px solid #484848;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.ts-dropdown .ts-input {
+    color: #f0f0f0;
+    background: #3a3a3a;
+}
+
+.ts-dropdown .option {
+    padding: 10px 15px;
+    color: #e0e0e0;
+    transition: background-color 0.15s ease;
+}
+
+.ts-dropdown .option.active {
+    background-color: #7b68ee;
+    color: #ffffff;
+}
+
+.ts-dropdown .create {
+    color: #a99eff;
+}
+
+.ts-wrapper.disabled .ts-control {
+    background-color: #2a2a2a;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.ts-wrapper.disabled .ts-control>input,
+.ts-wrapper.disabled .ts-control>div {
+    color: #666666;
+}
+
+.dropdown-gift-icon {
+    height: 20px;
+    width: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.ts-control .item img,
+.ts-dropdown .option img {
+    display: inline-block;
+    height: 20px;
+    width: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+/* Button Styling */
 .button {
     grid-column: 1 / -1;
     padding: 12px;
@@ -118,6 +165,7 @@ label {
     box-shadow: 0 2px 5px rgba(123, 104, 238, 0.3);
 }
 
+/* Results Area */
 #results-container {
     margin-top: 25px;
     padding: 0;
@@ -139,6 +187,7 @@ label {
     text-align: left;
 }
 
+/* Result Card Styling */
 .result-card {
     background-color: #2d2d2d;
     padding: 18px;
@@ -167,6 +216,7 @@ label {
     border-left-color: #ff6666;
 }
 
+/* Card Header (Image + Title) */
 .result-card-header {
     display: flex;
     align-items: center;
@@ -197,10 +247,12 @@ label {
     height: 22px;
 }
 
+/* Card Content (Info) */
 .result-card-content {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    /* Spacing between info items */
     padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -234,6 +286,7 @@ label {
     text-decoration: underline;
 }
 
+/* Loader */
 .loader {
     border: 4px solid #444;
     border-top: 4px solid #7b68ee;

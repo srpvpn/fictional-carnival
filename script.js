@@ -1,19 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const giftSelect = document.getElementById('gift-select');
-    const modelSelect = document.getElementById('model-select');
-    const backdropSelect = document.getElementById('backdrop-select');
-    const symbolSelect = document.getElementById('symbol-select');
     const searchBtn = document.getElementById('search-btn');
     const resultsContainer = document.getElementById('results-container');
-    const giftPreviewImg = document.getElementById('gift-preview-img');
 
-    const API_BASE_URL = 'http://109.206.236.151:8000';
+    const API_BASE_URL = 'http://127.0.0.1:8000';
+
+    const tomSelects = {}; // Store all TomSelect instances
 
     // --- Helper Functions ---
-
-    const generateSlug = (name) => {
-        // Приводим к нижнему регистру и удаляем все символы, кроме букв и цифр
-        return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const generateSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const showLoader = () => {
+        resultsContainer.innerHTML = '<div class="loader"></div>';
     };
 
     const apiFetch = async (endpoint) => {
@@ -31,104 +27,154 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const populateSelect = (selectElement, items, { placeholder, valueKey, textKey, defaultOptionText }) => {
-        selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`;
-        items.forEach(item => {
-            const value = valueKey ? item[valueKey] : item;
-            const text = textKey ? `${item[textKey]} (rarity: ${item.rarity || 'N/A'})` : item;
-            const option = new Option(text, value);
-            selectElement.add(option);
-        });
-        selectElement.disabled = false;
+    // --- TomSelect Initializers ---
+    const createTomSelect = (selector, settings) => {
+        const el = document.querySelector(selector);
+        if (el) {
+            tomSelects[el.id] = new TomSelect(el, settings);
+        }
     };
 
-    const showLoader = () => {
-        resultsContainer.innerHTML = '<div class="loader"></div>';
+    const imageRender = {
+        option: (data, escape) => `
+            <div>
+                <img src="${escape(data.imageUrl)}" class="dropdown-gift-icon" alt="" onerror="this.style.display='none'">
+                ${escape(data.text)}
+            </div>`,
+        item: (data, escape) => `
+            <div>
+                <img src="${escape(data.imageUrl)}" class="dropdown-gift-icon" alt="" onerror="this.style.display='none'">
+                ${escape(data.text)}
+            </div>`
     };
+
+    // Initialize all dropdowns
+    createTomSelect('#gift-select', {
+        valueField: 'value',
+        labelField: 'text',
+        searchField: 'text',
+        placeholder: 'Загрузка коллекций...',
+        render: imageRender
+    });
+
+    createTomSelect('#model-select', {
+        placeholder: 'Сначала выберите коллекцию',
+        render: imageRender
+    });
+
+    ['backdrop-select', 'symbol-select'].forEach(id => {
+        createTomSelect(`#${id}`, {
+            placeholder: 'Сначала выберите коллекцию',
+        });
+    });
+
+    ['model-select', 'backdrop-select', 'symbol-select'].forEach(id => {
+        if (tomSelects[id]) {
+            tomSelects[id].disable();
+        }
+    });
 
     // --- Data Loading Functions ---
+    const populateSelect = (selectId, items, { valueKey, textKey, defaultOptionText, hasRarity, imageKey }) => {
+        const instance = tomSelects[selectId];
+        if (!instance) return;
 
-    const resetSelect = (selectEl, placeholderText) => {
-        selectEl.innerHTML = `<option value="">${placeholderText}</option>`;
-        selectEl.disabled = true;
+        instance.clear();
+        instance.clearOptions();
+        instance.addOption({ value: '', text: defaultOptionText });
+
+        const options = items.map(item => {
+            const value = valueKey ? item[valueKey] : item;
+            let text = textKey ? item[textKey] : item;
+            const finalOption = { value, text };
+            if (imageKey && item[imageKey]) {
+                finalOption.imageUrl = item[imageKey];
+            }
+            return finalOption;
+        });
+
+        instance.addOptions(options);
+        instance.setValue('', true);
+        instance.enable();
+    };
+
+    const resetSelect = (selectId, placeholderText) => {
+        const instance = tomSelects[selectId];
+        if (!instance) return;
+        instance.clear();
+        instance.clearOptions();
+        instance.settings.placeholder = placeholderText;
+        instance.disable();
+        instance.sync();
     };
 
     const loadInitialData = async () => {
         try {
             const gifts = await apiFetch('/gifts');
-            populateSelect(giftSelect, gifts, { defaultOptionText: 'Выберите коллекцию' });
-        } catch (e) {
-            giftSelect.innerHTML = '<option value="">Ошибка загрузки коллекций</option>';
-        }
-        // Сброс зависимых селектов
-        resetSelect(modelSelect, 'Сначала выберите коллекцию');
-        resetSelect(backdropSelect, 'Сначала выберите коллекцию');
-        resetSelect(symbolSelect, 'Сначала выберите коллекцию');
-    };
-
-    const loadModelsForGift = async (giftName) => {
-        resetSelect(modelSelect, 'Загрузка моделей...');
-        try {
-            const models = await apiFetch(`/models?gift_name=${encodeURIComponent(giftName)}`);
-            populateSelect(modelSelect, models, {
+            const giftItems = gifts.map(name => ({
+                name: name,
+                imageUrl: `https://fragment.com/file/gifts/${generateSlug(name)}/thumb.webp`
+            }));
+            populateSelect('gift-select', giftItems, {
                 valueKey: 'name',
                 textKey: 'name',
-                defaultOptionText: 'Любая модель'
+                imageKey: 'imageUrl',
+                defaultOptionText: 'Выберите коллекцию'
             });
+            tomSelects['gift-select'].settings.placeholder = 'Выберите коллекцию';
+            tomSelects['gift-select'].sync();
+
         } catch (e) {
-            resetSelect(modelSelect, 'Ошибка загрузки моделей');
+            resetSelect('gift-select', 'Ошибка загрузки коллекций');
         }
     };
 
-    const loadBackdropsForGift = async (giftName) => {
-        resetSelect(backdropSelect, 'Загрузка фонов...');
-        try {
-            const backdrops = await apiFetch(`/backdrops?gift_name=${encodeURIComponent(giftName)}`);
-            const itemsToUse = backdrops.length ? backdrops : [''];
-            populateSelect(backdropSelect, itemsToUse, { defaultOptionText: 'Любой фон' });
-        } catch (e) {
-            resetSelect(backdropSelect, 'Ошибка загрузки фонов');
-        }
-    };
+    const loadDependentData = async (giftName) => {
+        const dataMap = {
+            'model-select': {
+                endpoint: `/models?gift_name=${encodeURIComponent(giftName)}`,
+                options: {
+                    valueKey: 'name',
+                    textKey: 'name',
+                    defaultOptionText: 'Любая модель',
+                    imageKey: 'url'
+                }
+            },
+            'backdrop-select': { endpoint: `/backdrops?gift_name=${encodeURIComponent(giftName)}`, options: { defaultOptionText: 'Любой фон' } },
+            'symbol-select': { endpoint: `/symbols?gift_name=${encodeURIComponent(giftName)}`, options: { defaultOptionText: 'Любой символ' } }
+        };
 
-    const loadSymbolsForGift = async (giftName) => {
-        resetSelect(symbolSelect, 'Загрузка символов...');
-        try {
-            const symbols = await apiFetch(`/symbols?gift_name=${encodeURIComponent(giftName)}`);
-            populateSelect(symbolSelect, symbols, { defaultOptionText: 'Любой символ' });
-        } catch (e) {
-            resetSelect(symbolSelect, 'Ошибка загрузки символов');
+        for (const [selectId, { endpoint, options }] of Object.entries(dataMap)) {
+            resetSelect(selectId, `Загрузка...`);
+            try {
+                const data = await apiFetch(endpoint);
+                const itemsToUse = Array.isArray(data) && data.length > 0 ? data : [];
+                populateSelect(selectId, itemsToUse, options);
+            } catch (e) {
+                resetSelect(selectId, 'Ошибка загрузки');
+            }
         }
     };
 
     // --- Event listeners ---
-
-    giftSelect.addEventListener('change', () => {
-        const gift = giftSelect.value;
-        // всегда сбрасываем зависимые селекты
-        resetSelect(modelSelect, 'Сначала выберите коллекцию');
-        resetSelect(backdropSelect, 'Сначала выберите коллекцию');
-        resetSelect(symbolSelect, 'Сначала выберите коллекцию');
-
-        if (gift) {
-            loadModelsForGift(gift);
-            loadBackdropsForGift(gift);
-            loadSymbolsForGift(gift);
+    tomSelects['gift-select']?.on('change', (value) => {
+        ['model-select', 'backdrop-select', 'symbol-select'].forEach(id => resetSelect(id, 'Сначала выберите коллекцию'));
+        if (value) {
+            loadDependentData(value);
         }
     });
 
     searchBtn.addEventListener('click', async () => {
-        const giftName = giftSelect.value;
+        const giftName = tomSelects['gift-select']?.getValue();
         if (!giftName) {
             resultsContainer.innerHTML = '<p>Пожалуйста, выберите коллекцию для поиска.</p>';
             return;
         }
-
         showLoader();
 
-        const model = modelSelect.value;
-        const backdrop = backdropSelect.value;
-        const symbol = symbolSelect.value;
+        const model = tomSelects['model-select']?.getValue();
+        const backdrop = tomSelects['backdrop-select']?.getValue();
+        const symbol = tomSelects['symbol-select']?.getValue();
 
         const queryParams = new URLSearchParams({ gift_name: giftName });
         if (model) queryParams.append('model', model);
@@ -138,13 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await apiFetch(`/floor?${queryParams.toString()}`);
             renderResults(data, giftName);
-        } catch (error) {
-            // Error is already displayed by apiFetch helper
-        }
+        } catch (error) { /* Error is already displayed by apiFetch helper */ }
     });
 
-    // --- Rendering ---
-
+    // --- Rendering (Existing code is mostly fine) ---
     const logos = {
         'Tonnel': `<svg class="marketplace-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#9d8fff"/><path d="M12 7h-1v10h2v-4h2v-2h-2V7z" fill="#9d8fff"/></svg>`,
         'Portals': `<svg class="marketplace-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z" fill="#9d8fff"/><path d="M12 10a2 2 0 100 4 2 2 0 000-4z" fill="#9d8fff"/></svg>`,
