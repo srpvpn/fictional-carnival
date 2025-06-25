@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBtn = document.getElementById('search-btn');
     const resultsContainer = document.getElementById('results-container');
 
-    const API_BASE_URL = 'http://127.0.0.1:8000';
+    const API_BASE_URL = 'https://api.lunarsnake.space/';
 
     const tomSelects = {}; // Store all TomSelect instances
 
